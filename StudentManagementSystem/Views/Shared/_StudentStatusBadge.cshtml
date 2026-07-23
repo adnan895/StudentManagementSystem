@@ -1,0 +1,14 @@
+﻿@model DateTime
+
+@{
+    var yearsEnrolled = (DateTime.Now - Model).Days / 365;
+}
+
+@if (yearsEnrolled >= 2)
+{
+    <span class="badge bg-success">Senior</span>
+}
+else
+{
+    <span class="badge bg-info text-dark">Junior</span>
+}

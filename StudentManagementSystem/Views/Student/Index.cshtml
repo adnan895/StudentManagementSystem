@@ -1,0 +1,100 @@
+﻿@model IEnumerable<StudentManagementSystem.Models.Student>
+
+@{
+    ViewData["Title"] = "Student List";
+}
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Student Management System</h2>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Student
+        </a>
+    </div>
+
+    <!-- Search Form -->
+    <form asp-action="Index" method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text"
+                   name="searchString"
+                   class="form-control"
+                   placeholder="Search by Name or Email..."
+                   value="@Context.Request.Query["searchString"]" />
+
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="bi bi-search"></i> Search
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-danger">
+                <i class="bi bi-arrow-clockwise"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <!-- Student Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Major</th>
+                        <th>Status</th>
+                        <th width="180">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var student in Model)
+                        {
+                            <tr>
+                                <td>@student.Id</td>
+                                <td>@student.FirstName @student.LastName</td>
+                                <td>@student.Email</td>
+                                <td>@student.Major</td>
+
+                                <td>
+                                    <partial name="_StudentStatusBadge"
+                                             model="student.EnrollmentDate" />
+                                </td>
+
+                                <td>
+                                    <a asp-action="Edit"
+                                       asp-route-id="@student.Id"
+                                       class="btn btn-sm btn-outline-warning me-1">
+                                        Edit
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@student.Id"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No students found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
