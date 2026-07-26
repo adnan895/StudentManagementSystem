@@ -1,0 +1,63 @@
+﻿@model IEnumerable<StudentManagementSystem.Models.Student>
+
+<table class="table table-hover table-striped mb-0">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["NameSortParm"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="text-white text-decoration-underline">
+                    Full Name ↕
+                </a>
+            </th>
+            <th>Email</th>
+            <th>Major</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["DateSortParm"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="text-white text-decoration-underline">
+                    Enrollment Date ↕
+                </a>
+            </th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                    No student records found.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var student in Model)
+            {
+                <tr>
+                    <td>@student.Id</td>
+                    <td>@student.FirstName @student.LastName</td>
+                    <td>@student.Email</td>
+                    <td>@student.Major</td>
+                    <td>@student.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        <partial name="_StudentStatusBadge" model="student.EnrollmentDate" />
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning btn-edit me-1" data-id="@student.Id">
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="@student.Id">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
