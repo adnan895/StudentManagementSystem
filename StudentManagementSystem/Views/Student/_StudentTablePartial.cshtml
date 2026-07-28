@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<StudentManagementSystem.Models.Student>
 
-<table class="table table-hover table-striped mb-0">
+<table class="table table-hover table-striped mb-0 align-middle">
     <thead class="table-dark">
         <tr>
             <th>ID</th>
+            <th>Photo</th>
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["NameSortParm"]"
@@ -13,7 +14,7 @@
                 </a>
             </th>
             <th>Email</th>
-            <th>Major</th>
+            <th>Department</th>
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["DateSortParm"]"
@@ -30,7 +31,7 @@
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="7" class="text-center py-4 text-muted">
+                <td colspan="8" class="text-center py-4 text-muted">
                     No student records found.
                 </td>
             </tr>
@@ -40,14 +41,35 @@
             @foreach (var student in Model)
             {
                 <tr>
+                    <!-- 1. ID -->
                     <td>@student.Id</td>
+
+                    <!-- 2. Photo -->
+                    <td class="text-center">
+                        <img src="@(string.IsNullOrEmpty(student.ProfilePicturePath) ? "/images/default-avatar.svg" : student.ProfilePicturePath)"
+                             alt="@student.FirstName @student.LastName"
+                             class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #dee2e6;" />
+                    </td>
+
+                    <!-- 3. Full Name -->
                     <td>@student.FirstName @student.LastName</td>
+
+                    <!-- 4. Email -->
                     <td>@student.Email</td>
+
+                    <!-- 5. Major -->
                     <td>@student.Major</td>
+
+                    <!-- 6. Enrollment Date -->
                     <td>@student.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+
+                    <!-- 7. Status Badge -->
                     <td>
                         <partial name="_StudentStatusBadge" model="student.EnrollmentDate" />
                     </td>
+
+                    <!-- 8. Actions -->
                     <td>
                         <button class="btn btn-sm btn-outline-warning btn-edit me-1" data-id="@student.Id">
                             Edit

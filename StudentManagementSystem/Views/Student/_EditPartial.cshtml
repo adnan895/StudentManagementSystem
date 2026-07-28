@@ -1,33 +1,54 @@
 ﻿@model StudentManagementSystem.Models.Student
 
-<form id="editStudentForm">
+<form id="editStudentForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input type="hidden" id="EditId" asp-for="Id" />
 
     <div class="mb-3">
         <label asp-for="FirstName" class="form-label"></label>
         <input asp-for="FirstName" class="form-control" id="EditFirstName" required />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="LastName" class="form-label"></label>
         <input asp-for="LastName" class="form-control" id="EditLastName" required />
+        <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" type="email" class="form-control" id="EditEmail" required />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Major" class="form-label"></label>
+        <label asp-for="Major" class="form-label">Department</label>
         <input asp-for="Major" class="form-control" id="EditMajor" required />
+        <span asp-validation-for="Major" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="EnrollmentDate" class="form-label"></label>
         <input asp-for="EnrollmentDate" type="date" class="form-control" id="EditEnrollmentDate"
                value="@Model.EnrollmentDate.ToString("yyyy-MM-dd")" required />
+        <span asp-validation-for="EnrollmentDate" class="text-danger"></span>
+    </div>
+
+    <!-- Current Profile Photo Preview -->
+    @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+    {
+        <div class="mb-2">
+            <label class="form-label d-block">Current Photo</label>
+            <img src="@Model.ProfilePicturePath" alt="Profile Photo" class="img-thumbnail" style="max-height: 100px; object-fit: cover;" />
+        </div>
+    }
+
+    <!-- Profile Picture File Input -->
+    <div class="mb-3">
+        <label class="form-label">Change Profile Photo</label>
+        <input type="file" name="ProfilePicture" id="EditPhotoInput" class="form-control" accept="image/*" />
+        <small class="text-muted">Leave empty if you want to keep the current photo.</small>
     </div>
 
     <div class="modal-footer px-0 pb-0 pt-3">

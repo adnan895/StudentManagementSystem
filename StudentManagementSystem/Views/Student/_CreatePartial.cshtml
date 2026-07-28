@@ -1,6 +1,6 @@
 ﻿@model StudentManagementSystem.Models.Student
 
-<form id="createStudentForm">
+<form id="createStudentForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
@@ -22,7 +22,7 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="Major" class="form-label">Major</label>
+        <label asp-for="Major" class="form-label">Department</label>
         <input asp-for="Major" class="form-control" id="Major" required />
         <span asp-validation-for="Major" class="text-danger"></span>
     </div>
@@ -31,6 +31,12 @@
         <label asp-for="EnrollmentDate" class="form-label">Enrollment Date</label>
         <input asp-for="EnrollmentDate" type="date" class="form-control" id="EnrollmentDate" required />
         <span asp-validation-for="EnrollmentDate" class="text-danger"></span>
+    </div>
+
+    <!-- Updated name="ProfilePicture" to match IFormFile? ProfilePicture in StudentController -->
+    <div class="mb-3">
+        <label class="form-label">Profile Photo</label>
+        <input type="file" name="ProfilePicture" id="PhotoInput" class="form-control" accept="image/*" />
     </div>
 
     <div class="modal-footer px-0 pb-0 pt-3">
