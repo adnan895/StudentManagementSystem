@@ -1,4 +1,8 @@
-﻿@model IEnumerable<StudentManagementSystem.Models.Student>
+﻿
+
+
+
+@model StudentManagementSystem.Models.PaginatedList<StudentManagementSystem.Models.Student>
 
 <table class="table table-hover table-striped mb-0 align-middle">
     <thead class="table-dark">
@@ -6,20 +10,18 @@
             <th>ID</th>
             <th>Photo</th>
             <th>
-                <a asp-action="Index"
-                   asp-route-sortOrder="@ViewData["NameSortParm"]"
-                   asp-route-searchString="@ViewData["CurrentFilter"]"
-                   class="text-white text-decoration-underline">
+                <a href="javascript:void(0);"
+                   class="text-white text-decoration-none sort-link"
+                   data-sort="@ViewData["NameSortParm"]">
                     Full Name ↕
                 </a>
             </th>
             <th>Email</th>
             <th>Department</th>
             <th>
-                <a asp-action="Index"
-                   asp-route-sortOrder="@ViewData["DateSortParm"]"
-                   asp-route-searchString="@ViewData["CurrentFilter"]"
-                   class="text-white text-decoration-underline">
+                <a href="javascript:void(0);"
+                   class="text-white text-decoration-none sort-link"
+                   data-sort="@ViewData["DateSortParm"]">
                     Enrollment Date ↕
                 </a>
             </th>
@@ -58,7 +60,7 @@
                     <!-- 4. Email -->
                     <td>@student.Email</td>
 
-                    <!-- 5. Major -->
+                    <!-- 5. Department -->
                     <td>@student.Major</td>
 
                     <!-- 6. Enrollment Date -->
@@ -68,6 +70,7 @@
                     <td>
                         <partial name="_StudentStatusBadge" model="student.EnrollmentDate" />
                     </td>
+
 
                     <!-- 8. Actions -->
                     <td>
@@ -83,3 +86,32 @@
         }
     </tbody>
 </table>
+
+<!-- Pagination Controls -->
+<div class="d-flex justify-content-between align-items-center p-3 bg-light border-top">
+    <small class="text-muted">
+        Showing Page <strong>@Model.PageIndex</strong> of <strong>@Model.TotalPages</strong> (@Model.TotalCount Total Students)
+    </small>
+
+    <nav aria-label="Table navigation">
+        <ul class="pagination pagination-sm mb-0">
+            <!-- Previous Button -->
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link page-change" href="javascript:void(0);" data-page="@(Model.PageIndex - 1)">Previous</a>
+            </li>
+
+            <!-- Page Number Links -->
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a class="page-link page-change" href="javascript:void(0);" data-page="@i">@i</a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link page-change" href="javascript:void(0);" data-page="@(Model.PageIndex + 1)">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

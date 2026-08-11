@@ -1,7 +1,9 @@
-﻿@model IEnumerable<StudentManagementSystem.Models.Student>
+﻿@model StudentManagementSystem.Models.PaginatedList<StudentManagementSystem.Models.Student>
 
 @{
     ViewData["Title"] = "Student List";
+    var selectedDept = ViewData["SelectedDepartment"] as string;
+    var selectedStatus = ViewData["StatusFilter"] as string;
 }
 
 <div class="container mt-4">
@@ -15,25 +17,59 @@
         </button>
     </div>
 
-    <!-- Search Form -->
-    <form asp-action="Index" method="get" class="mb-3">
-        <div class="input-group">
-            <input type="text"
-                   id="searchInput"
-                   name="searchString"
-                   class="form-control"
-                   placeholder="Search by Name or Email..."
-                   value="@Context.Request.Query["searchString"]" />
+    <!-- Multi-Criteria Search & Filter Toolbar -->
+    <form id="searchForm" class="card card-body bg-light mb-4 shadow-sm border-0">
+        <div class="row g-2 align-items-center">
+            <!-- 1. Text Search Input -->
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-bold small mb-1">Search Keywords</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text"
+                           id="searchInput"
+                           name="searchString"
+                           class="form-control"
+                           placeholder="Name or Email..."
+                           value="@ViewData["CurrentFilter"]" />
+                </div>
+            </div>
 
-            <button type="submit" class="btn btn-outline-secondary">
-                <i class="bi bi-search"></i> Search
-            </button>
+            <!-- 2. Department Filter Dropdown -->
+            <div class="col-md-3">
+                <label class="form-label text-muted fw-bold small mb-1">Department</label>
+                <select id="departmentFilter" name="selectedDepartment" class="form-select">
+                    <option value="">All Departments</option>
+                    @if (ViewData["Departments"] is List<string> departments)
+                    {
+                        foreach (var dept in departments)
+                        {
+                            <option value="@dept" selected="@(dept == selectedDept ? "selected" : null)">@dept</option>
+                        }
+                    }
+                </select>
+            </div>
 
-            <a asp-action="Index" class="btn btn-outline-danger">
-                <i class="bi bi-arrow-clockwise"></i> Reset
-            </a>
+            <!-- 3. Status Filter Dropdown -->
+            <div class="col-md-3">
+                <label class="form-label text-muted fw-bold small mb-1">Enrollment Status</label>
+                <select id="statusFilter" name="statusFilter" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="Active" selected="@(selectedStatus == "Active" ? "selected" : null)">Active</option>
+                    <option value="Graduated" selected="@(selectedStatus == "Graduated" ? "selected" : null)">Graduated</option>
+                </select>
+            </div>
+
+            
+
+            <!-- 4. Action Buttons -->
+            <div class="col-md-2 d-flex align-items-end gap-1 pt-4">
+                <button type="button" id="btnReset" class="btn btn-outline-success w-100" title="Reset Filters">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+            </div>
         </div>
     </form>
+
 
     <!-- Student Table Card -->
     <div class="card shadow-sm">
@@ -43,12 +79,12 @@
         </div>
     </div>
 
-</div>
+</div> 
 
 <!-- Hidden Anti-Forgery Token for AJAX Header Reading -->
-@Html.AntiForgeryToken()
+@Html.AntiForgeryToken() 
 
-<!-- Bootstrap Modal Shell -->
+ <!-- Bootstrap Modal Shell -->
 <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -63,8 +99,13 @@
     </div>
 </div>
 
+
 @section Scripts {
     <script>
+        // State tracking across AJAX refreshes
+        var currentPage = 1;
+        var currentSort = "@(ViewData["CurrentSort"] ?? "")";
+
         $(document).ready(function() {
 
             // SweetAlert2 Toast helper
@@ -76,10 +117,21 @@
                 timerProgressBar: true
             });
 
-            // Helper function to re-render table dynamically
-            function refreshTable() {
+            // Helper function to re-render table dynamically with pagination, sorting, and multi-filter parameters
+            function refreshTable(page = currentPage) {
+                currentPage = page;
+
                 var searchVal = $("#searchInput").val();
-                $.get("/Student/GetTablePartial", { searchString: searchVal })
+                var deptVal = $("#departmentFilter").val();
+                var statusVal = $("#statusFilter").val();
+
+                $.get("/Student/GetTablePartial", {
+                    searchString: searchVal,
+                    selectedDepartment: deptVal,
+                    statusFilter: statusVal,
+                    sortOrder: currentSort,
+                    pageNumber: currentPage
+                })
                     .done(function(data) {
                         $("#tableContainer").html(data);
                     })
@@ -100,7 +152,51 @@
                 }
             }
 
-            // 1. Open Create Modal
+            // ==========================================
+            // Pagination, Sorting & Multi-Filter Event Handlers
+            // ==========================================
+
+            // 1. AJAX Pagination click
+            $(document).on("click", ".page-change", function(e) {
+                e.preventDefault();
+                var page = $(this).data("page");
+                if (page) {
+                    refreshTable(page);
+                }
+            });
+
+            // 2. Dynamic Column Sorting click
+            $(document).on("click", ".sort-link", function(e) {
+                e.preventDefault();
+                currentSort = $(this).data("sort");
+                refreshTable(1); // Reset to page 1 on new sort direction
+            });
+
+            // 3. Search Form Submit
+            $("#searchForm").on("submit", function(e) {
+                e.preventDefault();
+                refreshTable(1); // Reset to page 1 on new filter criteria
+            });
+
+            // 4. Instant Filter on Dropdown Selection Change
+            $(document).on("change", "#departmentFilter, #statusFilter", function() {
+                refreshTable(1);
+            });
+
+            // 5. Reset Button Click
+            $("#btnReset").on("click", function() {
+                $("#searchInput").val("");
+                $("#departmentFilter").val("");
+                $("#statusFilter").val("");
+                currentSort = "";
+                refreshTable(1);
+            });
+
+            // ==========================================
+            // Modal & CRUD Operations (AJAX)
+            // ==========================================
+
+            // Open Create Modal
             $("#btnOpenCreateModal").click(function() {
                 $("#studentModalLabel").text("Add New Student");
 
@@ -115,30 +211,28 @@
                     });
             });
 
-            // 2. Submit Create Form with FormData (Supports File Uploads)
+            // Submit Create Form
             $(document).on("click", "#btnSaveStudent", function(e) {
                 e.preventDefault();
                 var $form = $("#createStudentForm");
 
-                // Validate form inputs
                 if ($form.length && $.validator && $.validator.unobtrusive) {
                     if (!$form.valid()) return false;
                 }
 
-                // Construct FormData object directly from the form DOM node
                 var formData = new FormData($form[0]);
 
                 $.ajax({
                     url: "/Student/CreateAjax",
                     type: "POST",
                     data: formData,
-                    contentType: false, // REQUIRED for multipart file upload
-                    processData: false, // REQUIRED to prevent jQuery from transforming data to string
+                    contentType: false,
+                    processData: false,
                     success: function(res) {
                         if (res.success) {
                             $("#studentModal").modal("hide");
                             Toast.fire({ icon: 'success', title: res.message || 'Student added successfully!' });
-                            refreshTable();
+                            refreshTable(1); // Return to page 1 to highlight new entry
                         } else {
                             Swal.fire('Validation Error', res.message || 'Validation failed.', 'warning');
                         }
@@ -149,7 +243,7 @@
                 });
             });
 
-            // 3. Open Edit Modal
+            // Open Edit Modal
             $(document).on("click", ".btn-edit", function() {
                 var studentId = $(this).data("id");
                 $("#studentModalLabel").text("Edit Student");
@@ -165,7 +259,7 @@
                     });
             });
 
-            // 4. Submit Edit Form with FormData
+            // Submit Edit Form
             $(document).on("click", "#btnUpdateStudent", function(e) {
                 e.preventDefault();
                 var $form = $("#editStudentForm");
@@ -174,20 +268,19 @@
                     if (!$form.valid()) return false;
                 }
 
-                // Construct FormData object from edit form
                 var formData = new FormData($form[0]);
 
                 $.ajax({
                     url: "/Student/EditAjax",
                     type: "POST",
                     data: formData,
-                    contentType: false, // REQUIRED
-                    processData: false, // REQUIRED
+                    contentType: false,
+                    processData: false,
                     success: function(res) {
                         if (res.success) {
                             $("#studentModal").modal("hide");
                             Toast.fire({ icon: 'success', title: res.message || 'Student updated successfully!' });
-                            refreshTable();
+                            refreshTable(); // Refresh current page
                         } else {
                             Swal.fire('Error', res.message || 'Update failed.', 'error');
                         }
@@ -198,7 +291,7 @@
                 });
             });
 
-            // 5. Delete Student
+            // Delete Student
             $(document).on("click", ".btn-delete", function() {
                 var studentId = $(this).data("id");
                 var token = $('input[name="__RequestVerificationToken"]').val();
@@ -220,7 +313,7 @@
                             success: function(res) {
                                 if (res.success) {
                                     Toast.fire({ icon: 'success', title: res.message || 'Student deleted!' });
-                                    refreshTable();
+                                    refreshTable(); // Refresh current page
                                 } else {
                                     Swal.fire('Error', res.message || 'Delete failed.', 'error');
                                 }
@@ -237,399 +330,4 @@
     </script>
 }
 
-@* 
-@section Scripts {
-    <script>
-        $(document).ready(function() {
 
-            // SweetAlert2 Toast helper
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-
-            // Helper function to re-render table dynamically
-            function refreshTable() {
-                var searchVal = $("#searchInput").val();
-                $.get("/Student/GetTablePartial", { searchString: searchVal })
-                    .done(function(data) {
-                        $("#tableContainer").html(data);
-                    })
-                    .fail(function() {
-                        console.error("Failed to refresh table container.");
-                    });
-            }
-
-            // Helper function to safely re-bind validation dynamically
-            function rebindValidation(formSelector) {
-                if (window.jQuery && $.validator && $.validator.unobtrusive) {
-                    var $form = $(formSelector);
-                    if ($form.length > 0) {
-                        $form.removeData("validator");
-                        $form.removeData("unobtrusiveValidation");
-                        $.validator.unobtrusive.parse(formSelector);
-                    }
-                }
-            }
-
-            // 1. Open Create Modal
-            $("#btnOpenCreateModal").click(function() {
-                $("#studentModalLabel").text("Add New Student");
-
-                $.get("/Student/CreatePartial")
-                    .done(function(data) {
-                        $("#modalBody").html(data);
-                        rebindValidation("#createStudentForm");
-                        $("#studentModal").modal("show");
-                    })
-                    .fail(function(xhr) {
-                        Swal.fire('Error', 'Could not load Create view. Status: ' + xhr.status, 'error');
-                    });
-            });
-
-            // 2. Submit Create Form with Validation
-            $(document).on("click", "#btnSaveStudent", function(e) {
-                e.preventDefault();
-                var $form = $("#createStudentForm");
-
-                // Check validation only if unobtrusive validator is active
-                if ($form.length && $.validator && $.validator.unobtrusive) {
-                    if (!$form.valid()) return false;
-                }
-
-                var formData = {
-                    FirstName: $("#FirstName").val(),
-                    LastName: $("#LastName").val(),
-                    Email: $("#Email").val(),
-                    Major: $("#Major").val(),
-                    EnrollmentDate: $("#EnrollmentDate").val()
-                };
-
-                var token = $('input[name="__RequestVerificationToken"]').val();
-
-                $.ajax({
-                    url: "/Student/CreateAjax",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(formData),
-                    headers: { "RequestVerificationToken": token },
-                    success: function(res) {
-                        if (res.success) {
-                            $("#studentModal").modal("hide");
-                            Toast.fire({ icon: 'success', title: res.message || 'Student added successfully!' });
-                            refreshTable();
-                        } else {
-                            Swal.fire('Validation Error', res.message || 'Validation failed.', 'warning');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                    }
-                });
-            });
-
-
-
-            // document.getElementById('btnSaveStudent').addEventListener('click', async function() {
-            //     const form = document.getElementById('createStudentForm');
-
-            //     // Use FormData to capture text fields, anti-forgery token, AND binary file data
-            //     const formData = new FormData(form);
-
-            //     try {
-            //         const response = await fetch('/Student/Create', {
-            //             method: 'POST',
-            //             body: formData // Sends multipart form data directly
-            //         });
-
-            //         const result = await response.json();
-
-            //         if (result.success) {
-            //             alert(result.message);
-            //             // Hide modal and refresh list
-            //             const modalElement = document.getElementById('yourModalId');
-            //             const modal = bootstrap.Modal.getInstance(modalElement);
-            //             if (modal) modal.hide();
-
-            //             location.reload();
-            //         } else {
-            //             alert("Error: " + result.message);
-            //         }
-            //     } catch (error) {
-            //         console.error("Upload error:", error);
-            //         alert("An unexpected error occurred.");
-            //     }
-            // });
-
-
-            // 3. Open Edit Modal
-            $(document).on("click", ".btn-edit", function() {
-                var studentId = $(this).data("id");
-                $("#studentModalLabel").text("Edit Student");
-
-                $.get("/Student/EditPartial/" + studentId)
-                    .done(function(data) {
-                        $("#modalBody").html(data);
-                        rebindValidation("#editStudentForm");
-                        $("#studentModal").modal("show");
-                    })
-                    .fail(function(xhr) {
-                        Swal.fire('Error', 'Could not load Edit view for ID ' + studentId + '. Status: ' + xhr.status, 'error');
-                    });
-            });
-
-            // 4. Submit Edit Form
-            $(document).on("click", "#btnUpdateStudent", function(e) {
-                e.preventDefault();
-                var $form = $("#editStudentForm");
-
-                if ($form.length && $.validator && $.validator.unobtrusive) {
-                    if (!$form.valid()) return false;
-                }
-
-                var formData = {
-                    Id: parseInt($("#EditId").val() || $("#Id").val()),
-                    FirstName: $("#EditFirstName").val() || $("#FirstName").val(),
-                    LastName: $("#EditLastName").val() || $("#LastName").val(),
-                    Email: $("#EditEmail").val() || $("#Email").val(),
-                    Major: $("#EditMajor").val() || $("#Major").val(),
-                    EnrollmentDate: $("#EditEnrollmentDate").val() || $("#EnrollmentDate").val()
-                };
-
-                var token = $('input[name="__RequestVerificationToken"]').val();
-
-                $.ajax({
-                    url: "/Student/EditAjax",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(formData),
-                    headers: { "RequestVerificationToken": token },
-                    success: function(res) {
-                        if (res.success) {
-                            $("#studentModal").modal("hide");
-                            Toast.fire({ icon: 'success', title: res.message || 'Student updated successfully!' });
-                            refreshTable();
-                        } else {
-                            Swal.fire('Error', res.message || 'Update failed.', 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                    }
-                });
-            });
-
-            // 5. Delete Student
-            $(document).on("click", ".btn-delete", function() {
-                var studentId = $(this).data("id");
-                var token = $('input[name="__RequestVerificationToken"]').val();
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmColor: '#d33',
-                    cancelColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "/Student/DeleteAjax/" + studentId,
-                            type: "POST",
-                            headers: { "RequestVerificationToken": token },
-                            success: function(res) {
-                                if (res.success) {
-                                    Toast.fire({ icon: 'success', title: res.message || 'Student deleted!' });
-                                    refreshTable();
-                                } else {
-                                    Swal.fire('Error', res.message || 'Delete failed.', 'error');
-                                }
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                            }
-                        });
-                    }
-                });
-            });
-
-        });
-    </script>
-} *@
-
-@* @section Scripts {
-    <script>
-        $(document).ready(function() {
-
-            // SweetAlert2 Toast helper
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-
-            // Helper function to re-render table dynamically
-            function refreshTable() {
-                var searchVal = $("#searchInput").val();
-                $.get("/Student/GetTablePartial", { searchString: searchVal })
-                    .done(function(data) {
-                        $("#tableContainer").html(data);
-                    })
-                    .fail(function() {
-                        console.error("Failed to refresh table container.");
-                    });
-            }
-
-            // Helper function to safely re-bind validation dynamically
-            function rebindValidation(formSelector) {
-                if (window.jQuery && $.validator && $.validator.unobtrusive) {
-                    var $form = $(formSelector);
-                    if ($form.length > 0) {
-                        $form.removeData("validator");
-                        $form.removeData("unobtrusiveValidation");
-                        $.validator.unobtrusive.parse(formSelector);
-                    }
-                }
-            }
-
-            // 1. Open Create Modal
-            $("#btnOpenCreateModal").click(function() {
-                $("#studentModalLabel").text("Add New Student");
-
-                $.get("/Student/CreatePartial")
-                    .done(function(data) {
-                        $("#modalBody").html(data);
-                        rebindValidation("#createStudentForm");
-                        $("#studentModal").modal("show");
-                    })
-                    .fail(function(xhr) {
-                        Swal.fire('Error', 'Could not load Create view. Status: ' + xhr.status, 'error');
-                    });
-            });
-
-            // 2. Submit Create Form with FormData (Supports File Uploads)
-            $(document).on("click", "#btnSaveStudent", function(e) {
-                e.preventDefault();
-                var $form = $("#createStudentForm");
-
-                // Check unobtrusive validation
-                if ($form.length && $.validator && $.validator.unobtrusive) {
-                    if (!$form.valid()) return false;
-                }
-
-                // Capture form fields AND file data automatically
-                var formData = new FormData($form[0]);
-
-                $.ajax({
-                    url: "/Student/CreateAjax",
-                    type: "POST",
-                    data: formData,
-                    processData: false, // Prevents jQuery from converting FormData into a query string
-                    contentType: false, // Tells jQuery not to set a Content-Type header (browser sets boundary)
-                    success: function(res) {
-                        if (res.success) {
-                            $("#studentModal").modal("hide");
-                            Toast.fire({ icon: 'success', title: res.message || 'Student added successfully!' });
-                            refreshTable();
-                        } else {
-                            Swal.fire('Validation Error', res.message || 'Validation failed.', 'warning');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                    }
-                });
-            });
-
-            // 3. Open Edit Modal
-            $(document).on("click", ".btn-edit", function() {
-                var studentId = $(this).data("id");
-                $("#studentModalLabel").text("Edit Student");
-
-                $.get("/Student/EditPartial/" + studentId)
-                    .done(function(data) {
-                        $("#modalBody").html(data);
-                        rebindValidation("#editStudentForm");
-                        $("#studentModal").modal("show");
-                    })
-                    .fail(function(xhr) {
-                        Swal.fire('Error', 'Could not load Edit view for ID ' + studentId + '. Status: ' + xhr.status, 'error');
-                    });
-            });
-
-            // 4. Submit Edit Form with FormData
-            $(document).on("click", "#btnUpdateStudent", function(e) {
-                e.preventDefault();
-                var $form = $("#editStudentForm");
-
-                if ($form.length && $.validator && $.validator.unobtrusive) {
-                    if (!$form.valid()) return false;
-                }
-
-                var formData = new FormData($form[0]);
-
-                $.ajax({
-                    url: "/Student/EditAjax",
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(res) {
-                        if (res.success) {
-                            $("#studentModal").modal("hide");
-                            Toast.fire({ icon: 'success', title: res.message || 'Student updated successfully!' });
-                            refreshTable();
-                        } else {
-                            Swal.fire('Error', res.message || 'Update failed.', 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                    }
-                });
-            });
-
-            // 5. Delete Student
-            $(document).on("click", ".btn-delete", function() {
-                var studentId = $(this).data("id");
-                var token = $('input[name="__RequestVerificationToken"]').val();
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmColor: '#d33',
-                    cancelColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "/Student/DeleteAjax/" + studentId,
-                            type: "POST",
-                            headers: { "RequestVerificationToken": token },
-                            success: function(res) {
-                                if (res.success) {
-                                    Toast.fire({ icon: 'success', title: res.message || 'Student deleted!' });
-                                    refreshTable();
-                                } else {
-                                    Swal.fire('Error', res.message || 'Delete failed.', 'error');
-                                }
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', 'Server returned error ' + xhr.status, 'error');
-                            }
-                        });
-                    }
-                });
-            });
-
-        });
-    </script>
-} *@

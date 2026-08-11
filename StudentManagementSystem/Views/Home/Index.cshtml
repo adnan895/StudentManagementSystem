@@ -1,8 +1,144 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Academic Management Portal";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid px-4 mt-4">
+
+    <!-- Centered Hero Header with Quick Actions -->
+    <div class="p-5 mb-5 rounded-4 text-center text-white shadow-lg"
+         style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <span class="badge bg-white text-primary mb-3 px-3 py-2 fw-bold text-uppercase rounded-pill shadow-sm">
+                    <i class="bi bi-speedometer2 me-1"></i> System Dashboard
+                </span>
+                <h1 class="display-5 fw-bold mb-3">Student Management Portal</h1>
+                <p class="fs-5 text-white mb-4 lh-base" style="opacity: 0.95;">
+                    Unified workspace for structuring academic departments, managing faculty assignments, publishing course catalogs, and handling student enrollments in courses.
+                </p>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Architectural Setup Pipeline (Relational Order) -->
+    <div class="mb-5">
+        <div class="d-flex align-items-center mb-2">
+            <h4 class="fw-bold mb-0 text-dark me-2">
+                <i class="bi bi-diagram-3-fill text-primary me-2"></i>System Architecture Workflow
+            </h4>
+            <span class="badge bg-secondary">Order of Dependencies</span>
+        </div>
+        <p class="text-muted small mb-4">Follow this relational sequence to ensure foreign keys and departmental links are established correctly.</p>
+
+        <!-- 5-Column Flex Grid for Desktop -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
+
+            <!-- Step 1: Department -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-dark">Step 01</span>
+                            <i class="bi bi-building fs-4 text-dark"></i>
+                        </div>
+                        <h5 class="fw-bold">Departments</h5>
+                        <p class="card-text text-muted small">
+                            Define root organizational units (e.g., Computer Science, Zoology).
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a asp-controller="Department" asp-action="Index" class="btn btn-sm btn-outline-dark w-100">
+                            Configure <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Instructor -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary">Step 02</span>
+                            <i class="bi bi-person-badge fs-4 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold">Instructors</h5>
+                        <p class="card-text text-muted small">
+                            Add faculty members and map them to parent departments.
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a asp-controller="Instructor" asp-action="Index" class="btn btn-sm btn-outline-primary w-100">
+                            Faculty Roster <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Course -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-warning text-dark">Step 03</span>
+                            <i class="bi bi-journal-bookmark fs-4 text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold">Courses</h5>
+                        <p class="card-text text-muted small">
+                            Build course offerings and assign teaching instructors.
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a asp-controller="Course" asp-action="Index" class="btn btn-sm btn-outline-warning text-dark w-100">
+                            Course Catalog <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Student -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-info text-dark">Step 04</span>
+                            <i class="bi bi-people fs-4 text-info"></i>
+                        </div>
+                        <h5 class="fw-bold">Students</h5>
+                        <p class="card-text text-muted small">
+                            Register student profiles, update details, and set majors.
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a asp-controller="Student" asp-action="Index" class="btn btn-sm btn-outline-info text-dark w-100">
+                            Student Directory <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Course Enrollments & Grading -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success">Step 05</span>
+                            <i class="bi bi-journal-check fs-4 text-success"></i>
+                        </div>
+                        <h5 class="fw-bold">Enrollments</h5>
+                        <p class="card-text text-muted small">
+                            Register courses, issue grades, and manage course drops.
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a asp-controller="Enrollment" asp-action="Index" class="btn btn-sm btn-outline-success w-100 fw-semibold">
+                            Manage Enrollments <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>

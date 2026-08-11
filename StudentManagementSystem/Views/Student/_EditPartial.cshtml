@@ -50,6 +50,18 @@
         <input type="file" name="ProfilePicture" id="EditPhotoInput" class="form-control" accept="image/*" />
         <small class="text-muted">Leave empty if you want to keep the current photo.</small>
     </div>
+    <!-- Enrollment Status Select -->
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label fw-bold small">Enrollment Status</label>
+        <select asp-for="Status" class="form-select" required>
+            <option value="">Select Status...</option>
+            
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+            <option value="Graduated">Graduated</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger small"></span>
+    </div>
 
     <div class="modal-footer px-0 pb-0 pt-3">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

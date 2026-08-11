@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Data;
@@ -19,66 +21,63 @@ namespace StudentManagementSystem.Controllers
         }
 
         // GET: Student
-        public async Task<IActionResult> Index(string searchString, string sortOrder)
+        public async Task<IActionResult> Index(
+            string searchString,
+            string selectedDepartment,
+            string statusFilter,
+            string sortOrder,
+            int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
             ViewData["CurrentFilter"] = searchString;
+            ViewData["SelectedDepartment"] = selectedDepartment;
+            ViewData["StatusFilter"] = statusFilter;
 
-            var studentsQuery = _context.Students.AsQueryable();
+            // Load distinct departments dynamically for the filter dropdown
+            ViewData["Departments"] = await _context.Students
+                .Select(s => s.Major)
+                .Distinct()
+                .Where(m => !string.IsNullOrEmpty(m))
+                .ToListAsync();
 
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                studentsQuery = studentsQuery.Where(s =>
-                    s.FirstName.Contains(searchString) ||
-                    s.LastName.Contains(searchString) ||
-                    s.Email.Contains(searchString) ||
-                    s.Major.Contains(searchString));
-            }
+            var studentsQuery = BuildFilteredQuery(searchString, selectedDepartment, statusFilter, sortOrder);
 
-            studentsQuery = sortOrder switch
-            {
-                "name_desc" => studentsQuery.OrderByDescending(s => s.LastName),
-                "Date" => studentsQuery.OrderBy(s => s.EnrollmentDate),
-                "date_desc" => studentsQuery.OrderByDescending(s => s.EnrollmentDate),
-                _ => studentsQuery.OrderBy(s => s.LastName),
-            };
+            int pageSize = 5;
+            int pageIndex = pageNumber ?? 1;
 
-            var students = await studentsQuery.ToListAsync();
-            return View(students);
+            var paginatedStudents = await PaginatedList<Student>.CreateAsync(studentsQuery, pageIndex, pageSize);
+            return View(paginatedStudents);
         }
 
         // GET: Student/GetTablePartial
         [HttpGet]
-        public async Task<IActionResult> GetTablePartial(string searchString, string sortOrder)
+        public async Task<IActionResult> GetTablePartial(
+            string searchString,
+            string selectedDepartment,
+            string statusFilter,
+            string sortOrder,
+            int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
             ViewData["CurrentFilter"] = searchString;
+            ViewData["SelectedDepartment"] = selectedDepartment;
+            ViewData["StatusFilter"] = statusFilter;
 
-            var studentsQuery = _context.Students.AsQueryable();
+            var studentsQuery = BuildFilteredQuery(searchString, selectedDepartment, statusFilter, sortOrder);
 
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                studentsQuery = studentsQuery.Where(s =>
-                    s.FirstName.Contains(searchString) ||
-                    s.LastName.Contains(searchString) ||
-                    s.Email.Contains(searchString) ||
-                    s.Major.Contains(searchString));
-            }
+            int pageSize = 5;
+            int pageIndex = pageNumber ?? 1;
 
-            studentsQuery = sortOrder switch
-            {
-                "name_desc" => studentsQuery.OrderByDescending(s => s.LastName),
-                "Date" => studentsQuery.OrderBy(s => s.EnrollmentDate),
-                "date_desc" => studentsQuery.OrderByDescending(s => s.EnrollmentDate),
-                _ => studentsQuery.OrderBy(s => s.LastName),
-            };
-
-            var students = await studentsQuery.ToListAsync();
-            return PartialView("_StudentTablePartial", students);
+            var paginatedStudents = await PaginatedList<Student>.CreateAsync(studentsQuery, pageIndex, pageSize);
+            return PartialView("_StudentTablePartial", paginatedStudents);
         }
 
+
+        
         // GET: Student/CreatePartial
         [HttpGet]
         public IActionResult CreatePartial()
@@ -91,7 +90,6 @@ namespace StudentManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAjax([FromForm] Student student, IFormFile? ProfilePicture)
         {
-            // Key Fix: Remove file property validation error if present
             ModelState.Remove("ProfilePicture");
 
             if (!ModelState.IsValid)
@@ -220,7 +218,54 @@ namespace StudentManagementSystem.Controllers
             }
         }
 
-        #region Helper File Methods
+        #region Helper Methods
+
+        private IQueryable<Student> BuildFilteredQuery(
+            string searchString,
+            string selectedDepartment,
+            string statusFilter,
+            string sortOrder)
+        {
+            var studentsQuery = _context.Students.AsNoTracking();
+
+            // 1. Text Search (FirstName, LastName, Email)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                studentsQuery = studentsQuery.Where(s =>
+                    s.FirstName.Contains(searchString) ||
+                    s.LastName.Contains(searchString) ||
+                    s.Email.Contains(searchString));
+            }
+
+            // 2. Department / Major Dropdown Filter
+            if (!string.IsNullOrEmpty(selectedDepartment))
+            {
+                studentsQuery = studentsQuery.Where(s => s.Major == selectedDepartment);
+            }
+
+            // 3. Status Filter (Active vs Graduated)
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                var cutoffDate = DateTime.Now.AddYears(-4);
+                if (statusFilter == "Active")
+                {
+                    studentsQuery = studentsQuery.Where(s => s.EnrollmentDate >= cutoffDate);
+                }
+                else if (statusFilter == "Graduated")
+                {
+                    studentsQuery = studentsQuery.Where(s => s.EnrollmentDate < cutoffDate);
+                }
+            }
+
+            // 4. Sort Direction
+            return sortOrder switch
+            {
+                "name_desc" => studentsQuery.OrderByDescending(s => s.FirstName),
+                "Date" => studentsQuery.OrderBy(s => s.EnrollmentDate),
+                "date_desc" => studentsQuery.OrderByDescending(s => s.EnrollmentDate),
+                _ => studentsQuery.OrderBy(s => s.FirstName),
+            };
+        }
 
         private async Task<string> SaveImageFileAsync(IFormFile file)
         {

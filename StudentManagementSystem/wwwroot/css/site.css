@@ -1,31 +1,154 @@
+/* Custom Properties / Variables */
+:root {
+    --font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --primary-color: #258cfb;
+    --primary-hover: #1b73d3;
+    --primary-focus-shadow: rgba(37, 140, 251, 0.25);
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --nav-border: #e9ecef;
+    --nav-text: #2b3035;
+    --nav-text-hover: #1a1d20;
+    --text-muted: #6c757d;
+}
+
+/* Base Styles & Typography */
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: var(--font-family-base);
+    margin-bottom: 60px;
+    color: var(--nav-text);
+    background-color: #f8f9fa;
+    padding-top: 70px; /* Offset for fixed navbar */
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+::selection {
+    background-color: var(--primary-color);
+    color: #ffffff;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Base Focus States */
+.btn:focus-visible,
+.btn-link.nav-link:focus-visible,
+.form-control:focus,
+.form-check-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-focus-shadow);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Navbar Container */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(10px); /* Modern frosted-glass effect */
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--nav-border);
+    padding: 0.75rem 1.5rem;
+    transition: all 0.25s ease-in-out;
+}
+
+/* Brand/Logo Styling */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--nav-text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.2s ease;
+}
+
+    .navbar-brand:hover {
+        opacity: 0.85;
+    }
+
+/* Nav Links & Navigation Bar Items */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link {
+    color: var(--nav-text);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+    .nav-link:hover {
+        color: var(--nav-text-hover);
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-link.active {
+        color: var(--primary-color);
+        background-color: rgba(37, 140, 251, 0.08);
+        font-weight: 600;
+    }
+
+/* Mobile Toggler / Hamburger Button */
+.navbar-toggler {
+    border: none;
+    background: transparent;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .navbar-toggler:focus-visible {
+        box-shadow: 0 0 0 3px var(--primary-focus-shadow);
+    }
+
+.navbar-toggler-icon {
+    width: 1.5em;
+    height: 1.5em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+/* Floating Label Placeholder Enhancements */
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--text-muted);
+    text-align: end;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, text-align 0.2s ease;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    opacity: 1;
+    text-align: start;
 }

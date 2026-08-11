@@ -38,6 +38,18 @@
         <label class="form-label">Profile Photo</label>
         <input type="file" name="ProfilePicture" id="PhotoInput" class="form-control" accept="image/*" />
     </div>
+    <!-- Enrollment Status Select -->
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label fw-bold small">Enrollment Status</label>
+        <select asp-for="Status" class="form-select" required>
+            <option value="">Select Status...</option>
+            
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+            <option value="Graduated">Graduated</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger small"></span>
+    </div>
 
     <div class="modal-footer px-0 pb-0 pt-3">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

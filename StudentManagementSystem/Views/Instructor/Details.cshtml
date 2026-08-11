@@ -1,0 +1,124 @@
+﻿@model StudentManagementSystem.Models.Instructor
+
+@{
+    ViewData["Title"] = "Instructor Details";
+    var unassignedStudents = ViewBag.UnassignedStudents as IEnumerable<StudentManagementSystem.Models.Student>;
+}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Instructors
+        </a>
+    </div>
+
+    <!-- Instructor Profile Header -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-user.png" : Model.ImageUrl)"
+                     alt="@Model.Name"
+                     class="rounded-circle border me-4"
+                     width="90" height="90" style="object-fit: cover;" />
+                <div>
+                    <h3 class="mb-1">@Model.Name</h3>
+                    <p class="text-muted mb-1">
+                        <strong>Department:</strong> <span class="badge bg-secondary">@Model.Major</span>
+                    </p>
+                    <p class="text-muted mb-0">
+                        <strong>Total Advisees:</strong>
+                        <span class="badge bg-info text-dark">@Model.Students.Count Students</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Student Box (Filtered by Department/Major) -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <h6 class="fw-bold mb-2">Assign Student from (@Model.Major) Department</h6>
+
+            @if (unassignedStudents != null && unassignedStudents.Any())
+            {
+                <form asp-action="AssignStudent" method="post" class="row g-2 align-items-center">
+                    <input type="hidden" name="instructorId" value="@Model.Id" />
+
+                    <div class="col-md-8">
+                        <select name="studentId" class="form-select" required>
+                            <option value="">-- Select Unassigned @Model.Major Student --</option>
+                            @foreach (var student in unassignedStudents)
+                            {
+                                <!-- UPDATED: Using FirstName and LastName -->
+                                <option value="@student.Id">@student.FirstName @student.LastName (@student.Email)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Assign Advisee
+                        </button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted mb-0 small">
+                    <i class="bi bi-info-circle me-1"></i> No unassigned students found in the <strong>@Model.Major</strong> department.
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Assigned Advisees List Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Assigned Student Advisees</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Students.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No students are currently assigned to this instructor.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var student in Model.Students)
+                        {
+                            <tr>
+                                <td>@student.Id</td>
+                                <!-- UPDATED: Using FirstName and LastName -->
+                                <td class="fw-bold">@student.FirstName @student.LastName</td>
+                                <td>@student.Email</td>
+                                <td><span class="badge bg-secondary">@student.Major</span></td>
+                                <td class="text-end">
+                                    <form asp-action="UnassignStudent" method="post" class="d-inline">
+                                        <input type="hidden" name="instructorId" value="@Model.Id" />
+                                        <input type="hidden" name="studentId" value="@student.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove student from advisor">
+                                            <i class="bi bi-person-x"></i> Unassign
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

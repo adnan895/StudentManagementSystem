@@ -1,6 +1,122 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container my-5">
+    <!-- Hero Header -->
+    <div class="card border-0 bg-primary text-white shadow-sm mb-4">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-shield-check display-5 me-3"></i>
+                <div>
+                    <h1 class="h2 fw-bold mb-0">System Privacy Policy</h1>
+                    <p class="text-white-50 mb-0">Last updated: August 2026</p>
+                </div>
+            </div>
+            <p class="lead mt-3 mb-0">
+                We are committed to protecting the academic data, personal information, and administrative privacy of all students and staff within our Student Management System.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content Column -->
+        <div class="col-lg-8">
+            <!-- 1. Data Collection -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-database-add me-2 text-primary"></i>1. Information We Collect
+                    </h5>
+                    <p class="text-muted">
+                        To maintain accurate academic records and manage student enrollments efficiently, our system collects and processes the following data:
+                    </p>
+                    <ul class="list-group list-group-flush mb-0">
+                        <li class="list-group-item bg-transparent px-0 text-secondary">
+                            <i class="bi bi-check2-circle text-success me-2"></i><strong>Personal Identifiers:</strong> Student Full Name, Email Address, and Identification Number.
+                        </li>
+                        <li class="list-group-item bg-transparent px-0 text-secondary">
+                            <i class="bi bi-check2-circle text-success me-2"></i><strong>Academic Records:</strong> Major, Academic Year Status (Freshman, Sophomore, Junior, Senior), and Enrollment Date.
+                        </li>
+                        <li class="list-group-item bg-transparent px-0 text-secondary">
+                            <i class="bi bi-check2-circle text-success me-2"></i><strong>Media Files:</strong> Student profile photographs uploaded during registration.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2. Data Usage -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-gear-wide-connected me-2 text-primary"></i>2. How We Use Your Data
+                    </h5>
+                    <p class="text-muted">Stored information is strictly utilized for core institutional administrative tasks, including:</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-people me-2 text-info"></i>Class Roster Management</h6>
+                                <p class="small text-muted mb-0">Filtering, searching, and organizing student records by Major and Enrollment Status.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-bar-chart me-2 text-warning"></i>Institutional Reporting</h6>
+                                <p class="small text-muted mb-0">Generating statistical metrics and departmental distribution charts for administrative dashboards.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Security -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-lock me-2 text-primary"></i>3. Data Protection & Security
+                    </h5>
+                    <p class="text-muted mb-0">
+                        All student records are secured via Entity Framework Core parameterization to prevent SQL injection, and image uploads are strictly validated and stored securely in server directory paths (`wwwroot/images/students`). Access is restricted to authorized administrative personnel.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar Column -->
+        <div class="col-lg-4">
+            <!-- Contact Box -->
+            <div class="card border-0 shadow-sm bg-light mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-envelope-paper me-2 text-primary"></i>Data Officer Contact</h6>
+                    <p class="small text-muted mb-3">
+                        Have questions about your personal data or need to request a record correction?
+                    </p>
+                    <div class="d-grid">
+                        <a href="mailto:admin@institution.edu" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-envelope me-1"></i> Contact Administration
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Policy Highlights -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle me-2 text-success"></i>Policy Snapshot</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success me-2"><i class="bi bi-check-lg"></i></span>
+                        <span class="small text-secondary">No Third-Party Data Sharing</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success me-2"><i class="bi bi-check-lg"></i></span>
+                        <span class="small text-secondary">Encrypted Local Storage</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success-subtle text-success me-2"><i class="bi bi-check-lg"></i></span>
+                        <span class="small text-secondary">Strict File MIME Validation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
