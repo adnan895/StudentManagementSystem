@@ -5,13 +5,25 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Header & Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Course Catalog</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Course
-        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <a asp-action="ExportPdf" target="_blank" class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF Report
+            </a>
+
+            @if (User.IsInRole("Admin") || User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Add New Course
+                </a>
+            }
+        </div>
     </div>
 
+    <!-- Course Table Card -->
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <table class="table table-hover align-middle mb-0">
@@ -47,12 +59,12 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-info text-dark">
-                                        @item.Enrollments.Count Students
+                                        @(item.Enrollments?.Count ?? 0) Students
                                     </span>
                                 </td>
                                 <td class="text-end">
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View Roster
+                                        <i class="bi bi-eye me-1"></i> View Roster
                                     </a>
                                 </td>
                             </tr>

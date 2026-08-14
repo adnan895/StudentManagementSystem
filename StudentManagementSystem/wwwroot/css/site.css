@@ -31,7 +31,7 @@ body {
     font-family: var(--font-family-base);
     margin-bottom: 60px;
     color: var(--nav-text);
-    background-color: #f8f9fa;
+    background-color: lightyellow;
     padding-top: 70px; /* Offset for fixed navbar */
 }
 
@@ -152,3 +152,117 @@ body {
     opacity: 1;
     text-align: start;
 }
+
+/* ---------- Application-wide UI Polishing ---------- */
+
+/* Page header used by each view to create consistent, professional headings */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0.25rem;
+    border-bottom: 1px solid #eef2f5;
+    margin-bottom: 1.25rem;
+}
+
+.page-header .title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #121417;
+}
+
+.page-header .subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+/* Card defaults for sections and lists */
+.card {
+    border-radius: 0.6rem;
+    box-shadow: 0 6px 18px rgba(18,20,23,0.04);
+    border: 1px solid rgba(18,20,23,0.04);
+}
+
+.card-header {
+    border-top-left-radius: 0.6rem;
+    border-top-right-radius: 0.6rem;
+}
+
+.card .card-body { padding: 1rem; }
+
+/* Table styling to match industry look */
+.table thead th {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    font-size: 0.95rem;
+}
+
+.table tbody tr:hover { background-color: rgba(37,140,251,0.03); }
+
+.table td, .table th { vertical-align: middle; }
+
+/* Action buttons compact style */
+.btn-sm { padding: 0.35rem 0.6rem; font-size: 0.85rem; }
+
+/* Navbar tab enhancements: clearly distinguish active tab with underline */
+.navbar-nav .nav-item { position: relative; }
+.navbar-nav .nav-link {
+    position: relative;
+}
+.navbar-nav .nav-link::after {
+    content: "";
+    display: block;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border-radius: 3px;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: -6px;
+    transition: width 180ms ease-in-out, opacity 180ms ease-in-out;
+    opacity: 0;
+}
+.navbar-nav .nav-link:hover::after { width: 80%; opacity: 1; }
+.navbar-nav .nav-link.active::after { width: 80%; opacity: 1; }
+
+/* Dropdown/menu states */
+.dropdown-menu { border-radius: 0.5rem; box-shadow: 0 8px 18px rgba(18,20,23,0.08); }
+.dropdown-item:hover { background-color: rgba(37,140,251,0.06); color: var(--primary-hover); }
+
+/* Breadcrumb and small utility controls */
+.breadcrumb { background: transparent; padding: 0; margin-bottom: 0.5rem; }
+.breadcrumb .breadcrumb-item + .breadcrumb-item::before { content: ">"; color: var(--text-muted); }
+
+/* Badges refinement */
+.badge { border-radius: 0.45rem; font-weight: 600; }
+.badge.bg-info { background-color: #e6f4ff; color: #0b5ed7; }
+.badge.bg-primary { background-color: #e9f2ff; color: var(--primary-color); }
+
+/* Form and control sizing for consistent spacing */
+.form-label { font-weight: 600; color: #2c3338; }
+.form-control, .form-select { border-radius: 0.45rem; }
+
+/* Responsive adjustments */
+@media (max-width: 575.98px) {
+    .navbar { padding: 0.6rem 0.9rem; }
+    .navbar-brand { font-size: 1rem; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
+
+/* Utility: subtle success and error outlines for inline feedback */
+.is-valid { box-shadow: 0 0 0 3px rgba(40,167,69,0.08); border-color: rgba(40,167,69,0.45); }
+.is-invalid { box-shadow: 0 0 0 3px rgba(220,53,69,0.06); border-color: rgba(220,53,69,0.6); }
+
+/* Small helper for page containers to create uniform width */
+.page-container { max-width: 1100px; margin: 0 auto; padding-left: 0.5rem; padding-right: 0.5rem; }
+
+/* Visual focus for interactive lists (instructor/course lists) */
+.list-item-interactive { padding: 0.65rem; border-radius: 0.5rem; transition: background 120ms ease, transform 120ms ease; }
+.list-item-interactive:hover { background: rgba(37,140,251,0.03); transform: translateY(-2px); }
+
+/* Small icon helper in nav and buttons */
+.bi { vertical-align: -.125em; margin-right: 0.35rem; }
+
+/* End of custom site styles */

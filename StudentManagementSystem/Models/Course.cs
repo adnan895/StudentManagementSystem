@@ -20,6 +20,9 @@ namespace StudentManagementSystem.Models
         [Display(Name = "Department")]
         public string Department { get; set; } = string.Empty; // Matches Major/Department
 
+        // Add this property
+        public string Code { get; set; } = string.Empty;
+
         // Foreign Key: Assigned Instructor teaching this course
         [Display(Name = "Assigned Instructor")]
         public int? InstructorId { get; set; }

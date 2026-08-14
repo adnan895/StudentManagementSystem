@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using StudentManagementSystem.Data;
+using StudentManagementSystem.Models;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity Services with Roles
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
-    options.Password.RequireDigit = true;
+// Add Identity Services with ApplicationUser
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { // Changed IdentityUser to ApplicationUser
+    options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
@@ -25,6 +28,9 @@ builder.Services.ConfigureApplicationCookie(options => {
 
 builder.Services.AddControllersWithViews();
 
+// Set QuestPDF license (Free for open source / community / educational use)
+QuestPDF.Settings.License = LicenseType.Community;
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -35,7 +41,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 // Enable Authentication & Authorization
@@ -44,23 +49,33 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    //pattern: "{controller=Home}/{action=Index}/{id?}");
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Automatically apply pending EF Core migrations on application startup
+//// Automatically apply pending EF Core migrations & seed database
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    try
+//    {
+//        var context = services.GetRequiredService<ApplicationDbContext>();
+//        context.Database.Migrate();
+
+//        // Seed Roles and Admin User
+//        await DbInitializer.SeedRolesAndAdminAsync(services);
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while setting up database/roles.");
+//    }
+//}
+
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Creates missing tables (including AspNetUsers) automatically
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while applying database migrations.");
-    }
+    // Change SeedRolesAndAdminAsync to SeedRolesAndUsersAsync
+    await DbInitializer.SeedRolesAndUsersAsync(services);
 }
 
 app.Run();

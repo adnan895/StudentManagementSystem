@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Data;
 using StudentManagementSystem.Models;
+using StudentManagementSystem.Reports;
+using QuestPDF.Fluent;
 
 namespace StudentManagementSystem.Controllers
 {
-    [Authorize]
+    //[Authorize(Roles = "Student")]
     public class StudentController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -295,6 +297,19 @@ namespace StudentManagementSystem.Controllers
             {
                 System.IO.File.Delete(fullPath);
             }
+        }
+
+        // Inside StudentController class:
+        public async Task<IActionResult> ExportPdf()
+        {
+            var students = await _context.Students
+                .AsNoTracking()
+                .ToListAsync();
+
+            var report = new StudentListReport(students);
+            byte[] pdfBytes = report.GeneratePdf();
+
+            return File(pdfBytes, "application/pdf", $"Student_Roster_{DateTime.Now:yyyyMMdd}.pdf");
         }
 
         #endregion

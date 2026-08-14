@@ -1,14 +1,27 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using StudentManagementSystem.Data;
 using StudentManagementSystem.Models;
+using StudentManagementSystem.ViewModels;
 
 namespace StudentManagementSystem.Controllers
 {
-    public class HomeController : Controller
+    // Primary Constructor syntax removes boilerplate constructor fields
+    public class HomeController(ILogger<HomeController> logger, ApplicationDbContext context) : Controller
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var viewModel = new DashboardViewModel
+            {
+                TotalStudents = await context.Students.CountAsync(),
+                TotalCourses = await context.Courses.CountAsync(),
+                TotalInstructors = await context.Instructors.CountAsync(),
+                TotalDepartments = await context.Departments.CountAsync(),
+                TotalEnrollments = await context.Enrollments.CountAsync()
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Privacy()

@@ -9,14 +9,24 @@
 <div class="container mt-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Student Management System</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Title -->
+        <h2 class="mb-0">Student Management System</h2>
 
-        <button type="button" class="btn btn-primary" id="btnOpenCreateModal">
-            <i class="bi bi-plus-circle"></i> Add New Student
-        </button>
+        <!-- Right Action Buttons Group -->
+        <div class="d-flex align-items-center gap-2">
+            <a asp-controller="Student" asp-action="ExportPdf" target="_blank" class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Export to PDF
+            </a>
+
+            <button type="button" class="btn btn-primary" id="btnOpenCreateModal">
+                <i class="bi bi-plus-circle me-1"></i> Add New Student
+            </button>
+        </div>
     </div>
 
+    
+    
     <!-- Multi-Criteria Search & Filter Toolbar -->
     <form id="searchForm" class="card card-body bg-light mb-4 shadow-sm border-0">
         <div class="row g-2 align-items-center">
@@ -324,6 +334,26 @@
                         });
                     }
                 });
+
+                document.getElementById('btnExportPdf').addEventListener('click', function() {
+                    // Read current values from your filter inputs/selects
+                    const searchString = document.getElementById('searchStringInput')?.value || '';
+                    const selectedDepartment = document.getElementById('departmentSelect')?.value || '';
+                    const statusFilter = document.getElementById('statusSelect')?.value || '';
+                    const sortOrder = document.getElementById('sortOrderHidden')?.value || '';
+
+                    // Build query URL
+                    const params = new URLSearchParams({
+                        searchString: searchString,
+                        selectedDepartment: selectedDepartment,
+                        statusFilter: statusFilter,
+                        sortOrder: sortOrder
+                    });
+
+                    // Trigger PDF Download
+                    window.location.href = `@Url.Action("ExportPdf", "Student")?${params.toString()}`;
+                });
+
             });
 
         });
